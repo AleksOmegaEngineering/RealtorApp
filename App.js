@@ -1,101 +1,162 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, View, SafeAreaView, Dimensions, Platform, PixelRatio, Image, AppRegistry } from 'react-native';
-import * as Font from 'expo-font';
+import * as React from "react";
+import * as Font from "expo-font";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  Dimensions,
+  Platform,
+  PixelRatio,
+  Image,
+  AppRegistry,
+  TouchableOpacity,
+} from "react-native";
+import { StatusBar } from "expo-status-bar";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
- function EntryCreator(props) {
-  return(
-    <View style={styles.fullEntry}>
-    <View style={styles.entrySample}>
-    <View style={styles.entryImageContainer}>
-      <Image source={require("./assets/images/sampleHouse.jpg")} style={styles.entryImage}/>
-    </View>
+let sampleName = ["4040 Sierra Rd, Grand Prairie, TX 75052","4041 Sierra Rd, Grand Prairie, TX 75052","4042 Sierra Rd, Grand Prairie, TX 75052"];
+let sampleDescription = ["3 bds 2 ba 1,239 sqft - House for sale","3 bds 2 ba 1,239 sqft - House for sale","3 bds 2 ba 1,239 sqft - House for sale"];
 
-    <View style={styles.entryInformation}>
-      <View style={styles.entryNameCont}>
-        <Text style={styles.entryName} adjustsFontSizeToFit={true} numberOfLines={2}>4040 Sierra Rd, Grand Prairie, TX 75052</Text>
+function Header(props) {
+  return (
+    <View style={styles.header}>
+      <View adjustsFontSizeToFit style={styles.imageContainer}>
+        <Image
+          style={styles.logo}
+          source={require("./assets/images/fullAOLogo.png")}
+        />
       </View>
-      <View style={styles.entryDescriptionCont}>
-        <Text style={styles.entryDescription} adjustsFontSizeToFit={true} numberOfLines={2}>3 bds 2 ba 1,239 sqft - House for sale</Text>
-      </View>
+      <Text adjustsFontSizeToFit numberOfLines={1} style={styles.headerText}>
+        ALEKS OMEGA
+      </Text>
     </View>
-  </View>
-  <View style={styles.seperator}>
-  </View>
-  </View>
   );
 }
 
-const {
-  width: SCREEN_WIDTH,
-  height: SCREEN_HEIGHT,
-} = Dimensions.get('window');
+function HomeScreen({ navigation }) {
+  let properties = []
+  for (let i = 0; i < sampleName.length; i++) {
+    properties.push(
+    <TouchableOpacity style={styles.fullEntry} onPress={() => navigation.navigate("Information")} key={i}>
+      <View style={styles.entrySample}>
+        <View style={styles.entryImageContainer}>
+          <Image source={require("./assets/images/sampleHouse.jpg")} style={styles.entryImage}/>
+        </View>
+        <View style={styles.entryInformation}>
+          <View style={styles.entryNameCont}>
+            <Text style={styles.entryName} adjustsFontSizeToFit={true} numberOfLines={2}>
+              {sampleName[i]}
+            </Text>
+          </View>
+          <View style={styles.entryDescriptionCont}>
+            <Text style={styles.entryDescription} adjustsFontSizeToFit={true} numberOfLines={2}>
+              {sampleDescription[i]}
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.seperator}></View>
+    </TouchableOpacity>
+    );
+  }
+  return (
+    <SafeAreaView style={styles.safeAreaView}>
+      <StatusBar style={{ barStyle: "dark", backgroundColor: "#ffff" }} />
+      <Header />
+      <View style={styles.scrollArea}>
+        <ScrollView style={styles.scrollView}>
+          {properties}
+        </ScrollView>
+      </View>
+    </SafeAreaView>
+  );
+}
+
+function EntryCreator(props) {
+  return (
+    <TouchableOpacity style={styles.fullEntry} onPress={() => navigation.navigate('Details')}>
+      <View style={styles.entrySample}>
+        <View style={styles.entryImageContainer}>
+          <Image source={require("./assets/images/sampleHouse.jpg")} style={styles.entryImage}/>
+        </View>
+        <View style={styles.entryInformation}>
+          <View style={styles.entryNameCont}>
+            <Text style={styles.entryName} adjustsFontSizeToFit={true} numberOfLines={2}>
+              {props.name}
+            </Text>
+          </View>
+          <View style={styles.entryDescriptionCont}>
+            <Text style={styles.entryDescription} adjustsFontSizeToFit={true} numberOfLines={2}>
+              {props.description}
+            </Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.seperator}></View>
+    </TouchableOpacity>
+  );
+}
+function Information(props){
+  return(
+    <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
+      <Text>
+        HELLO WORLD
+      </Text>
+    </View>
+  );
+}
+function Navigation() {
+  const Stack = createNativeStackNavigator();
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Home"
+          component={HomeScreen}
+        />
+        <Stack.Screen
+          name="Information"
+          component={Information}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
 let headerWidth = 0;
 let headerHeight = 0;
 
 const AOBlue = "#080B47";
 
-
 export default class App extends React.Component {
   state = {
     fontsLoaded: false,
-    dimensionsFound: true,
   };
 
-  async find_dimesions(layout){
-    const {x, y, width, height} = layout;
-    console.warn("Width: " + width);
-    headerWidth = width;
-    console.warn("Height: " + height);
-    headerHeight = height;
-  }
-
-  async loadFonts(){
+  async loadFonts() {
     await Font.loadAsync({
       OpenSans: require("./assets/fonts/OpenSans.ttf"),
       OpenSansSemiBold: require("./assets/fonts/OpenSans-SemiBold.ttf"),
       BadGuyBlack: require("./assets/fonts/BadGuyBlack.ttf"),
     });
-    this.setState({ fontsLoaded: true});
+    this.setState({ fontsLoaded: true });
   }
 
-  componentDidMount(){
+  componentDidMount() {
     this.loadFonts();
   }
 
-
-  render(){
-    if(this.state.fontsLoaded){
-      return (
-        <SafeAreaView style={styles.safeAreaView}>
-          <StatusBar style={{ barStyle: "dark", backgroundColor: '#fff' }} />
-          <View style={styles.header}>
-            <View adjustsFontSizeToFit style={styles.imageContainer}>
-              <Image style={styles.logo} source={require("./assets/images/fullAOLogo.png")}/>
-            </View>
-            <Text adjustsFontSizeToFit numberOfLines={1} onLayout={(event) => { this.find_dimesions(event.nativeEvent.layout) }} style={styles.headerText}>ALEKS OMEGA</Text>
-          </View>
-          <View style={styles.scrollArea}>
-            <ScrollView style={styles.scrollView}>
-              <EntryCreator/>
-              <EntryCreator/>
-              <EntryCreator/>
-              <EntryCreator/>
-              <EntryCreator/>
-              <EntryCreator/>
-              <EntryCreator/>
-
-            </ScrollView>
-
-          </View>
-        </SafeAreaView>
-      );
-  }
-    else{
-      return(
-        null
-      );
+  render() {
+    if (this.state.fontsLoaded) {
+      return <Navigation />;
+    } else {
+      return null;
     }
   }
 }
@@ -105,7 +166,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flex: 1,
     top: 0,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderColor: "#fff",
     borderBottomColor: AOBlue,
     borderWidth: 0,
@@ -130,7 +191,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     margin: 5,
-    fontFamily: 'OpenSansSemiBold',
+    fontFamily: "OpenSansSemiBold",
     fontSize: 300,
     color: AOBlue,
     // borderColor: "red",
@@ -165,7 +226,7 @@ const styles = StyleSheet.create({
     height: 2,
     maxWidth: "100%",
     marginLeft: "5%",
-    marginRight: "5%"
+    marginRight: "5%",
   },
   entryImageContainer: {
     // height: "100%",
@@ -176,18 +237,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  entryImage:{
+  entryImage: {
     resizeMode: "contain",
     // borderColor: "blue",
     // borderWidth: 5,
     height: "95%",
     width: "95%",
   },
-  entryInformation:{
+  entryInformation: {
     flex: 2,
     // borderColor: "blue",
     // borderWidth: 5,
-    flexDirection: 'column',
+    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
   },
