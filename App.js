@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState, useEffect } from "react";
 import * as Font from "expo-font";
 import {
   ScrollView,
@@ -16,9 +16,26 @@ import {
 import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { FlatList } from "react-native-gesture-handler";
 
-let sampleName = ["4040 Sierra Rd, Grand Prairie, TX 75052","4041 Sierra Rd, Grand Prairie, TX 75052","4042 Sierra Rd, Grand Prairie, TX 75052"];
-let sampleDescription = ["3 bds 2 ba 1,239 sqft - House for sale","3 bds 2 ba 1,239 sqft - House for sale","3 bds 2 ba 1,239 sqft - House for sale"];
+let sampleName = [
+  "4040 Sierra Rd, Grand Prairie, TX 75052",
+  "4041 Sierra Rd, Grand Prairie, TX 75052",
+  "4042 Sierra Rd, Grand Prairie, TX 75052",
+];
+let sampleDescription = [
+  "3 bds 2 ba 1,239 sqft - House for sale",
+  "3 bds 2 ba 1,239 sqft - House for sale",
+  "3 bds 2 ba 1,239 sqft - House for sale",
+];
+const AOBlue = "#080B47";
+
+// async function fetchData(){
+//   let response = await fetch("http://192.168.1.139:4545/properties");
+//   let data = await response.json();
+//   console.log(data);
+//   return data;
+// }
 
 function Header(props) {
   return (
@@ -36,75 +53,79 @@ function Header(props) {
   );
 }
 
-function HomeScreen({ navigation }) {
-  let properties = []
-  for (let i = 0; i < sampleName.length; i++) {
-    properties.push(
-    <TouchableOpacity style={styles.fullEntry} onPress={() => navigation.navigate("Information")} key={i}>
-      <View style={styles.entrySample}>
-        <View style={styles.entryImageContainer}>
-          <Image source={require("./assets/images/sampleHouse.jpg")} style={styles.entryImage}/>
-        </View>
-        <View style={styles.entryInformation}>
-          <View style={styles.entryNameCont}>
-            <Text style={styles.entryName} adjustsFontSizeToFit={true} numberOfLines={2}>
-              {sampleName[i]}
-            </Text>
+export class HomeScreen extends React.Component {
+  state = {
+    data: [],
+    propertiesComponent: [],
+  };
+  async fetchData() {
+    let response = await fetch("http://192.168.1.139:4545/properties");
+    let newData = await response.json();
+    // console.log(newData[0][0]);
+    this.setState({ data: newData });
+  }
+  componentDidMount() {
+    this.fetchData().then(() =>{
+      properties = []
+      for (let i = 0; i < this.state.data.length; i++) {
+        properties.push(
+        <TouchableOpacity
+          style={styles.fullEntry}
+          onPress={() => this.props.navigation.navigate("Information")}
+          key={i}
+        >
+          <View style={styles.entrySample}>
+            <View style={styles.entryImageContainer}>
+              <Image
+                source={require("./assets/images/sampleHouse.jpg")}
+                style={styles.entryImage}
+              />
+            </View>
+            <View style={styles.entryInformation}>
+              <View style={styles.entryNameCont}>
+                <Text
+                  style={styles.entryName}
+                  adjustsFontSizeToFit={true}
+                  numberOfLines={2}
+                >
+                  {this.state.data[i][0]}
+                </Text>
+              </View>
+              <View style={styles.entryDescriptionCont}>
+                <Text
+                  style={styles.entryDescription}
+                  adjustsFontSizeToFit={true}
+                  numberOfLines={2}
+                >
+                  {this.state.data[i][1]}
+                </Text>
+              </View>
+            </View>
           </View>
-          <View style={styles.entryDescriptionCont}>
-            <Text style={styles.entryDescription} adjustsFontSizeToFit={true} numberOfLines={2}>
-              {sampleDescription[i]}
-            </Text>
-          </View>
+          <View style={styles.seperator}></View>
+        </TouchableOpacity>
+        )
+      }
+      this.setState({propertiesComponent: properties});
+    });
+  }
+  render(){
+    return(
+      <SafeAreaView style={styles.safeAreaView}>
+        <StatusBar style={{ barStyle: "dark", backgroundColor: "#ffff" }} />
+        <Header />
+        <View style={styles.scrollArea}>
+          <ScrollView style={styles.scrollView}>{this.state.propertiesComponent}</ScrollView>
         </View>
-      </View>
-      <View style={styles.seperator}></View>
-    </TouchableOpacity>
+      </SafeAreaView>
     );
   }
-  return (
-    <SafeAreaView style={styles.safeAreaView}>
-      <StatusBar style={{ barStyle: "dark", backgroundColor: "#ffff" }} />
-      <Header />
-      <View style={styles.scrollArea}>
-        <ScrollView style={styles.scrollView}>
-          {properties}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
-  );
 }
 
-function EntryCreator(props) {
+function Information(props) {
   return (
-    <TouchableOpacity style={styles.fullEntry} onPress={() => navigation.navigate('Details')}>
-      <View style={styles.entrySample}>
-        <View style={styles.entryImageContainer}>
-          <Image source={require("./assets/images/sampleHouse.jpg")} style={styles.entryImage}/>
-        </View>
-        <View style={styles.entryInformation}>
-          <View style={styles.entryNameCont}>
-            <Text style={styles.entryName} adjustsFontSizeToFit={true} numberOfLines={2}>
-              {props.name}
-            </Text>
-          </View>
-          <View style={styles.entryDescriptionCont}>
-            <Text style={styles.entryDescription} adjustsFontSizeToFit={true} numberOfLines={2}>
-              {props.description}
-            </Text>
-          </View>
-        </View>
-      </View>
-      <View style={styles.seperator}></View>
-    </TouchableOpacity>
-  );
-}
-function Information(props){
-  return(
-    <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
-      <Text>
-        HELLO WORLD
-      </Text>
+    <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+      <Text>HELLO WORLD</Text>
     </View>
   );
 }
@@ -118,21 +139,11 @@ function Navigation() {
           name="Home"
           component={HomeScreen}
         />
-        <Stack.Screen
-          name="Information"
-          component={Information}
-        />
+        <Stack.Screen name="Information" component={Information} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
-
-let headerWidth = 0;
-let headerHeight = 0;
-
-const AOBlue = "#080B47";
 
 export default class App extends React.Component {
   state = {

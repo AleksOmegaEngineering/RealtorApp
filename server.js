@@ -39,12 +39,22 @@ app.get("/properties", function (req, res) {
     }
   });
   function executeStatement(res1) {
-    let buffer = { result: "" };
-    let request = new Request("SELECT * FROM properties", function (err) {
+    results = [];
+    buffer = [];
+    let request = new Request("SELECT name, description FROM properties", function (err) {
       if (err) {
         console.log(err);
       } else {
-        res1.send(buffer.result);
+        // for(let i = 0; i < results.length; i++){
+        //   for(let j = 0; j < 2; j++){
+        //     console.log(results[i][j]);
+        //     res.write(results[i][j]);
+        //     res.write(" ");
+        //   }
+        //   res.write("\n");
+        // }
+        // res.end();
+        res.json(results)
         connection.close();
       }
     });
@@ -53,10 +63,11 @@ app.get("/properties", function (req, res) {
         if (column.value === null) {
           console.log("NULL");
         } else {
-          buffer.result += column.value + " ";
+          buffer.push(column.value);
         }
       });
-      buffer.result += "<br/>";
+      results.push(buffer);
+      buffer = []
     });
 
     request.on("done", function (rowCount) {
@@ -65,7 +76,7 @@ app.get("/properties", function (req, res) {
 
     request.on("doneInProc", function (rowCount, more) {
     //   res1.json(buffer.result);
-      console.log(buffer.result);
+      // console.log(buffer.result);
       console.log(rowCount + " rows returned");
     });
 
